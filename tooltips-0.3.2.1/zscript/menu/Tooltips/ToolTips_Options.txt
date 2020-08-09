@@ -37,7 +37,7 @@
   *
   * OptionMenu Descendents
   *
-  * VERSION 0.3.2.1
+  * VERSION 0.3.3.0
   *
   */
 
@@ -188,6 +188,33 @@ class OptionMenuItemTLTPSubmenu : OptionMenuItemSubmenu
 		cr_TipColor = tipColor;
 		Super.Init(label, command, param, centered);
 		return self;
+	}
+}
+
+class OptionMenuItemTLTPCommand : OptionMenuItemCommand
+{
+	String mTooltip;
+	Name cr_TipColor;
+	Name values;
+	CVar valueSwitch;
+	
+	OptionMenuItemTLTPCommand Init(String label, String tooltip, Name tipColor, Name command, Name values = "", CVar valueSwitch = null, bool centered = false, bool closeonselect = false)
+	{
+		mTooltip = tooltip;
+		cr_TipColor = tipColor;
+		self.values = values;
+		self.valueSwitch = valueSwitch;
+		Super.Init(label, command, centered, closeonselect);
+		return self;
+	}
+	
+	override int Draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+	{
+		super.Draw(desc, y, indent, selected);
+		String text = StringTable.Localize(OptionValues.GetText(values, valueSwitch != null ? valueSwitch.GetInt() : false));
+		if (text.Length() == 0) text = "Unknown";
+		drawValue(indent, y, OptionMenuSettings.mFontColorValue, text, false);
+		return indent; 
 	}
 }
 
@@ -348,6 +375,12 @@ class TLTPOptionsMenu : OptionMenu
 			{
 				tt = StringTable.Localize(OptionMenuItemTLTPSubmenu(mDesc.mItems[mDesc.mSelectedItem]).mTooltip);
 				cr = OptionMenuItemTLTPSubmenu(mDesc.mItems[mDesc.mSelectedItem]).cr_TipColor;
+				bValidObject = true;
+			}
+			else if (mDesc.mItems[mDesc.mSelectedItem] is "OptionMenuItemTLTPCommand")
+			{
+				tt = StringTable.Localize(OptionMenuItemTLTPCommand(mDesc.mItems[mDesc.mSelectedItem]).mTooltip);
+				cr = OptionMenuItemTLTPCommand(mDesc.mItems[mDesc.mSelectedItem]).cr_TipColor;
 				bValidObject = true;
 			}
 			else
